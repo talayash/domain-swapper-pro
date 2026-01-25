@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Domain Swapper Pro",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Quickly switch between environments (dev, staging, QA, production) while preserving URL paths",
   "permissions": ["activeTab", "storage", "contextMenus"],
   "icons": {

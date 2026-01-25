@@ -1,7 +1,7 @@
 {
   "name": "domain-swapper-pro",
   "displayName": "Domain Swapper Pro",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Quickly switch between environments (dev, staging, QA, production) while preserving URL paths",
   "type": "module",
   "scripts": {

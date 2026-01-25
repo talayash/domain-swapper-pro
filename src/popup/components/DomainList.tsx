@@ -13,7 +13,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy
 } from '@dnd-kit/sortable';
-import { Plus, FolderPlus, Settings } from 'lucide-react';
+import { Plus, FolderPlus, Settings, Globe } from 'lucide-react';
 import type { Domain, Folder } from '~/types';
 import { useStore } from '~/store';
 import { useRootFolders } from '../hooks/useFolders';
@@ -110,23 +110,28 @@ export function DomainList() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-3 border-b">
+      {/* Header */}
+      <div className="header">
         <div className="flex items-center justify-between mb-3">
-          <h1 className="text-lg font-semibold flex items-center gap-2">
-            <span>🔄</span> Domain Swapper Pro
+          <h1 className="header-title">
+            <div className="p-1.5 rounded-lg bg-primary/10">
+              <Globe className="h-5 w-5 text-primary" />
+            </div>
+            <span>Domain Swapper</span>
           </h1>
           <button
             onClick={() => chrome.runtime.openOptionsPage()}
-            className="p-1.5 hover:bg-secondary rounded"
+            className="btn-icon-sm flex items-center justify-center"
             title="Settings"
           >
-            <Settings className="h-4 w-4" />
+            <Settings className="h-4 w-4 text-muted-foreground" />
           </button>
         </div>
         <SearchBar value={searchQuery} onChange={setSearchQuery} />
       </div>
 
-      <div className="flex-1 overflow-y-auto p-2">
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto scrollbar-thin p-2">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -150,10 +155,8 @@ export function DomainList() {
         </DndContext>
 
         {filteredUncategorized.length > 0 && (
-          <div className="mt-2">
-            <div className="px-2 py-1 text-xs font-medium text-muted-foreground uppercase">
-              Uncategorized
-            </div>
+          <div className="mt-3">
+            <div className="section-label">Uncategorized</div>
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}
@@ -176,8 +179,9 @@ export function DomainList() {
         )}
 
         {rootFolders.length === 0 && uncategorizedDomains.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <p className="text-muted-foreground mb-4">No domains yet</p>
+          <div className="empty-state">
+            <Globe className="empty-state-icon" />
+            <p className="empty-state-text">No domains yet</p>
             <button
               onClick={() => setIsDomainModalOpen(true)}
               className="btn btn-primary"
@@ -189,7 +193,8 @@ export function DomainList() {
         )}
       </div>
 
-      <div className="p-3 border-t flex gap-2">
+      {/* Footer */}
+      <div className="footer">
         <button
           onClick={() => {
             setEditingDomain(null);
@@ -207,6 +212,7 @@ export function DomainList() {
             setIsFolderModalOpen(true);
           }}
           className="btn btn-secondary"
+          title="Add Folder"
         >
           <FolderPlus className="h-4 w-4" />
         </button>

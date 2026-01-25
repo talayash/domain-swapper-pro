@@ -111,16 +111,16 @@ export function FolderItem({
   const hasContent = filteredDomains.length > 0 || childFolders.length > 0;
 
   return (
-    <div ref={setNodeRef} style={style} className="select-none">
+    <div ref={setNodeRef} style={style} className="select-none mb-1">
       <Collapsible.Root open={!folder.isCollapsed} onOpenChange={() => toggleFolderCollapse(folder.id)}>
         <div
-          className="flex items-center gap-1 px-2 py-1.5 rounded-md hover:bg-secondary/50 cursor-pointer group"
+          className="folder-item group"
           style={{ paddingLeft: `${level * 16 + 8}px` }}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
           <button
-            className="cursor-grab active:cursor-grabbing p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="drag-handle"
             {...attributes}
             {...listeners}
           >
@@ -128,7 +128,7 @@ export function FolderItem({
           </button>
 
           <Collapsible.Trigger asChild>
-            <button className="p-0.5">
+            <button className="p-0.5 rounded hover:bg-secondary/80 transition-colors">
               {folder.isCollapsed ? (
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
               ) : (
@@ -139,44 +139,42 @@ export function FolderItem({
 
           <span className="text-base">{folder.icon || '📁'}</span>
 
-          <span className="flex-1 text-sm font-medium truncate">{folder.name}</span>
+          <span className="flex-1 text-sm font-medium truncate text-foreground">{folder.name}</span>
 
-          <span className="text-xs text-muted-foreground mr-1">
+          <span className="badge badge-muted mr-1">
             {filteredDomains.length}
           </span>
 
-          {isHovered && (
-            <div className="flex items-center gap-0.5">
-              {level === 0 && (
-                <button
-                  onClick={handleAddSubfolder}
-                  className="p-1 hover:bg-secondary rounded"
-                  title="Add subfolder"
-                >
-                  <FolderPlus className="h-3.5 w-3.5 text-muted-foreground" />
-                </button>
-              )}
+          <div className={`flex items-center gap-0.5 transition-opacity duration-150 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
+            {level === 0 && (
               <button
-                onClick={handleEdit}
-                className="p-1 hover:bg-secondary rounded"
-                title="Edit"
+                onClick={handleAddSubfolder}
+                className="action-btn"
+                title="Add subfolder"
               >
-                <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+                <FolderPlus className="h-3.5 w-3.5 text-muted-foreground" />
               </button>
-              <button
-                onClick={handleDelete}
-                className="p-1 hover:bg-secondary rounded"
-                title="Delete"
-              >
-                <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-red-500" />
-              </button>
-            </div>
-          )}
+            )}
+            <button
+              onClick={handleEdit}
+              className="action-btn"
+              title="Edit"
+            >
+              <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+            </button>
+            <button
+              onClick={handleDelete}
+              className="action-btn-danger"
+              title="Delete"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </div>
 
         <Collapsible.Content>
           {hasContent && (
-            <div className="ml-4" style={{ marginLeft: `${level * 16 + 24}px` }}>
+            <div className="ml-4 animate-fade-in" style={{ marginLeft: `${level * 16 + 24}px` }}>
               {childFolders.map((childFolder) => (
                 <FolderItem
                   key={childFolder.id}

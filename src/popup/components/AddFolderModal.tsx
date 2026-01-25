@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { X } from 'lucide-react';
+import { X, FolderOpen, Type } from 'lucide-react';
 import type { Folder } from '~/types';
 import { useStore } from '~/store';
 import { validateFolderName } from '~/lib/validators';
@@ -53,26 +53,36 @@ export function AddFolderModal({ isOpen, onClose, editingFolder, parentId }: Add
     onClose();
   };
 
+  const getTitle = () => {
+    if (editingFolder) return 'Edit Folder';
+    if (parentId) return 'Add Subfolder';
+    return 'Add Folder';
+  };
+
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/50" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-background rounded-lg shadow-lg p-4 w-[320px]">
-          <div className="flex items-center justify-between mb-4">
-            <Dialog.Title className="text-lg font-semibold">
-              {editingFolder ? 'Edit Folder' : parentId ? 'Add Subfolder' : 'Add Folder'}
+        <Dialog.Overlay className="modal-overlay" />
+        <Dialog.Content className="modal-content">
+          <div className="flex items-center justify-between mb-5">
+            <Dialog.Title className="text-lg font-semibold flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-primary/10">
+                <FolderOpen className="h-4 w-4 text-primary" />
+              </div>
+              {getTitle()}
             </Dialog.Title>
             <Dialog.Close asChild>
-              <button className="p-1 hover:bg-secondary rounded">
-                <X className="h-4 w-4" />
+              <button className="btn-icon-sm flex items-center justify-center">
+                <X className="h-4 w-4 text-muted-foreground" />
               </button>
             </Dialog.Close>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1">
-                Name <span className="text-red-500">*</span>
+              <label className="flex items-center gap-2 text-sm font-medium mb-2">
+                <Type className="h-3.5 w-3.5 text-muted-foreground" />
+                Name <span className="text-destructive">*</span>
               </label>
               <input
                 type="text"
@@ -88,17 +98,20 @@ export function AddFolderModal({ isOpen, onClose, editingFolder, parentId }: Add
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Icon</label>
-              <div className="flex flex-wrap gap-2">
+              <label className="flex items-center gap-2 text-sm font-medium mb-2">
+                <span className="text-muted-foreground">🎨</span>
+                Icon
+              </label>
+              <div className="flex flex-wrap gap-1.5">
                 {FOLDER_ICONS.map((emoji) => (
                   <button
                     key={emoji}
                     type="button"
                     onClick={() => setIcon(emoji)}
-                    className={`p-2 text-lg rounded-md transition-colors ${
+                    className={`p-2 text-lg rounded-lg transition-all duration-150 ${
                       icon === emoji
-                        ? 'bg-primary text-primary-foreground'
-                        : 'hover:bg-secondary'
+                        ? 'bg-primary text-primary-foreground shadow-sm scale-110'
+                        : 'hover:bg-secondary hover:scale-105'
                     }`}
                   >
                     {emoji}
@@ -108,17 +121,17 @@ export function AddFolderModal({ isOpen, onClose, editingFolder, parentId }: Add
             </div>
 
             {error && (
-              <div className="text-sm text-red-500 bg-red-50 dark:bg-red-950 p-2 rounded">
+              <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg border border-destructive/20">
                 {error}
               </div>
             )}
 
-            <div className="flex gap-2 pt-2">
+            <div className="flex gap-2 pt-3">
               <button type="button" onClick={onClose} className="btn btn-secondary flex-1">
                 Cancel
               </button>
               <button type="submit" className="btn btn-primary flex-1">
-                {editingFolder ? 'Save' : 'Add'}
+                {editingFolder ? 'Save Changes' : 'Add Folder'}
               </button>
             </div>
           </form>

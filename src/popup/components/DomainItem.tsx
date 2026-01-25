@@ -60,13 +60,13 @@ export function DomainItem({ domain, onEdit }: DomainItemProps) {
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-secondary/50 cursor-pointer group"
+      className="domain-item group"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={handleSwap}
     >
       <button
-        className="cursor-grab active:cursor-grabbing p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+        className="drag-handle"
         {...attributes}
         {...listeners}
       >
@@ -75,32 +75,32 @@ export function DomainItem({ domain, onEdit }: DomainItemProps) {
 
       <div className="flex-1 min-w-0">
         {domain.label && (
-          <div className="text-sm font-medium truncate">{domain.label}</div>
+          <div className="text-sm font-medium truncate text-foreground">{domain.label}</div>
         )}
-        <div className={`text-xs truncate ${domain.label ? 'text-muted-foreground' : 'text-sm'}`}>
+        <div className={`truncate ${domain.label ? 'text-xs text-muted-foreground' : 'text-sm text-foreground'}`}>
           {displayUrl}
         </div>
       </div>
 
-      {isHovered && (
-        <div className="flex items-center gap-1">
-          <button
-            onClick={handleEdit}
-            className="p-1 hover:bg-secondary rounded"
-            title="Edit"
-          >
-            <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
-          </button>
-          <button
-            onClick={handleDelete}
-            className="p-1 hover:bg-secondary rounded"
-            title="Delete"
-          >
-            <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-red-500" />
-          </button>
+      <div className={`flex items-center gap-0.5 transition-opacity duration-150 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
+        <button
+          onClick={handleEdit}
+          className="action-btn"
+          title="Edit"
+        >
+          <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+        </button>
+        <button
+          onClick={handleDelete}
+          className="action-btn-danger"
+          title="Delete"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
+        <div className="action-btn">
           <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
         </div>
-      )}
+      </div>
     </div>
   );
 }

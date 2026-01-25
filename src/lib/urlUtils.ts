@@ -52,13 +52,14 @@ export function buildSwapUrl(
     newProtocol = current.protocol;
   }
 
-  const newHost = target.port
-    ? `${target.hostname}:${target.port}`
-    : target.hostname;
-
   const newUrl = new URL(currentUrl);
   newUrl.protocol = newProtocol;
-  newUrl.host = newHost;
+  newUrl.hostname = target.hostname;
+  // Explicitly set or clear the port to handle all swap cases:
+  // - From port URL to non-port URL (e.g., localhost:3000 → www.example.com)
+  // - From non-port URL to port URL (e.g., www.example.com → localhost:3000)
+  // - Between different ports (e.g., localhost:3000 → localhost:8080)
+  newUrl.port = target.port || '';
 
   return newUrl.toString();
 }
