@@ -3,7 +3,9 @@ node_modules/
 
 # Build output
 build/
+dist/
 .plasmo/
+*.zip
 
 # IDE
 .idea/
