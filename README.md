@@ -35,7 +35,7 @@
 ## Installation
 
 ### From Chrome Web Store
-Coming soon!
+**[Install Domain Swapper Pro](https://chromewebstore.google.com/detail/domain-swapper-pro/lkjaaifkmcomiaakacfgfggnpckamklp)**
 
 ### From Source (Developer Mode)
 
