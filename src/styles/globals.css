@@ -63,7 +63,7 @@
 
 @layer components {
   .popup-container {
-    @apply w-[360px] min-h-[420px] max-h-[600px] overflow-hidden;
+    @apply w-[360px] min-h-[420px] max-h-[600px] flex flex-col overflow-hidden;
   }
 
   /* Buttons */

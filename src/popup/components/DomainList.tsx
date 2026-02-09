@@ -109,7 +109,7 @@ export function DomainList() {
     : uncategorizedDomains;
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col flex-1 min-h-0">
       {/* Header */}
       <div className="header">
         <div className="flex items-center justify-between mb-3">
