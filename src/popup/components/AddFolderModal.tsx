@@ -65,10 +65,8 @@ export function AddFolderModal({ isOpen, onClose, editingFolder, parentId }: Add
         <Dialog.Overlay className="modal-overlay" />
         <Dialog.Content className="modal-content">
           <div className="flex items-center justify-between mb-5">
-            <Dialog.Title className="text-lg font-semibold flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-primary/10">
-                <FolderOpen className="h-4 w-4 text-primary" />
-              </div>
+            <Dialog.Title className="text-base font-medium flex items-center gap-2">
+              <FolderOpen className="h-4 w-4 text-muted-foreground" />
               {getTitle()}
             </Dialog.Title>
             <Dialog.Close asChild>
@@ -108,10 +106,10 @@ export function AddFolderModal({ isOpen, onClose, editingFolder, parentId }: Add
                     key={emoji}
                     type="button"
                     onClick={() => setIcon(emoji)}
-                    className={`p-2 text-lg rounded-lg transition-all duration-150 ${
+                    className={`p-2 text-lg rounded-md transition-colors duration-100 ${
                       icon === emoji
-                        ? 'bg-primary text-primary-foreground shadow-sm scale-110'
-                        : 'hover:bg-secondary hover:scale-105'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'hover:bg-secondary'
                     }`}
                   >
                     {emoji}
@@ -121,7 +119,7 @@ export function AddFolderModal({ isOpen, onClose, editingFolder, parentId }: Add
             </div>
 
             {error && (
-              <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg border border-destructive/20">
+              <div className="text-sm text-destructive bg-destructive/5 p-2.5 rounded-md">
                 {error}
               </div>
             )}

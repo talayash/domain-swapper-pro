@@ -114,9 +114,7 @@ export function DomainList() {
       <div className="header">
         <div className="flex items-center justify-between mb-3">
           <h1 className="header-title">
-            <div className="p-1.5 rounded-lg bg-primary/10">
-              <Globe className="h-5 w-5 text-primary" />
-            </div>
+            <Globe className="h-4 w-4 text-muted-foreground" />
             <span>Domain Swapper</span>
           </h1>
           <button
