@@ -29,6 +29,7 @@
 | **Import/Export** | Backup and share your domain configurations |
 | **Context Menu** | Right-click to swap domains directly from any page |
 | **Protocol Control** | Per-domain protocol settings (HTTP/HTTPS/Preserve) |
+| **Ignore Path Prefixes** | Strip locale or environment prefixes (e.g., `/he-il`, `/en-us`) when swapping to a domain |
 
 ---
 
@@ -114,6 +115,7 @@ Switch between environments while keeping your current path:
 | `localhost:3000/dashboard/users` | `staging.app.com` | `https://staging.app.com/dashboard/users` |
 | `staging.app.com/api/v1/users` | `localhost:8080` | `http://localhost:8080/api/v1/users` |
 | `app.example.com/settings` | `dev.example.com` | `https://dev.example.com/settings` |
+| `y.co.il/he-il/page` | `x.co.il` (ignores `he-il`) | `https://x.co.il/page` |
 
 ---
 

@@ -24,12 +24,17 @@ export const createDomainsSlice: StateCreator<DomainsSlice, [], [], DomainsSlice
       ? Math.max(...domainsInFolder.map((d) => d.order))
       : -1;
 
+    const cleanedIgnorePaths = input.ignorePaths
+      ?.map((p) => p.trim().replace(/^\/+/, ''))
+      .filter((p) => p.length > 0);
+
     const newDomain: Domain = {
       id: uuidv4(),
       url: input.url.trim().replace(/\/+$/, ''),
       label: input.label?.trim(),
       folderId,
       protocol: input.protocol || 'preserve',
+      ignorePaths: cleanedIgnorePaths && cleanedIgnorePaths.length > 0 ? cleanedIgnorePaths : undefined,
       order: maxOrder + 1,
       createdAt: Date.now(),
       updatedAt: Date.now()
@@ -43,6 +48,12 @@ export const createDomainsSlice: StateCreator<DomainsSlice, [], [], DomainsSlice
   },
 
   updateDomain: (id, updates) => {
+    const cleanedIgnorePaths = updates.ignorePaths !== undefined
+      ? updates.ignorePaths
+          ?.map((p) => p.trim().replace(/^\/+/, ''))
+          .filter((p) => p.length > 0)
+      : undefined;
+
     set((state) => ({
       domains: state.domains.map((domain) =>
         domain.id === id
@@ -51,6 +62,9 @@ export const createDomainsSlice: StateCreator<DomainsSlice, [], [], DomainsSlice
               ...updates,
               url: updates.url ? updates.url.trim().replace(/\/+$/, '') : domain.url,
               label: updates.label !== undefined ? updates.label?.trim() : domain.label,
+              ignorePaths: cleanedIgnorePaths !== undefined
+                ? (cleanedIgnorePaths && cleanedIgnorePaths.length > 0 ? cleanedIgnorePaths : undefined)
+                : domain.ignorePaths,
               updatedAt: Date.now()
             }
           : domain

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { X, Globe, Tag, Folder, Shield } from 'lucide-react';
+import { X, Globe, Tag, Folder, Shield, Scissors } from 'lucide-react';
 import type { Domain } from '~/types';
 import { useStore } from '~/store';
 import { useFolderOptions } from '../hooks/useFolders';
-import { validateDomainInput, validateLabel } from '~/lib/validators';
+import { validateDomainInput, validateLabel, validateIgnorePaths } from '~/lib/validators';
 
 interface AddDomainModalProps {
   isOpen: boolean;
@@ -17,6 +17,7 @@ export function AddDomainModal({ isOpen, onClose, editingDomain }: AddDomainModa
   const [label, setLabel] = useState('');
   const [folderId, setFolderId] = useState<string | null>(null);
   const [protocol, setProtocol] = useState<'http' | 'https' | 'preserve'>('preserve');
+  const [ignorePaths, setIgnorePaths] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const addDomain = useStore((state) => state.addDomain);
@@ -31,11 +32,13 @@ export function AddDomainModal({ isOpen, onClose, editingDomain }: AddDomainModa
         setLabel(editingDomain.label || '');
         setFolderId(editingDomain.folderId);
         setProtocol(editingDomain.protocol || 'preserve');
+        setIgnorePaths(editingDomain.ignorePaths?.join(', ') || '');
       } else {
         setUrl('');
         setLabel('');
         setFolderId(defaultFolderId);
         setProtocol('preserve');
+        setIgnorePaths('');
       }
       setError(null);
     }
@@ -56,10 +59,31 @@ export function AddDomainModal({ isOpen, onClose, editingDomain }: AddDomainModa
       return;
     }
 
+    const parsedIgnorePaths = ignorePaths
+      .split(',')
+      .map((p) => p.trim())
+      .filter((p) => p.length > 0);
+
+    if (parsedIgnorePaths.length > 0) {
+      const ignoreValidation = validateIgnorePaths(parsedIgnorePaths);
+      if (!ignoreValidation.isValid) {
+        setError(ignoreValidation.error || 'Invalid ignore paths');
+        return;
+      }
+    }
+
+    const domainData = {
+      url,
+      label: label || undefined,
+      folderId,
+      protocol,
+      ignorePaths: parsedIgnorePaths.length > 0 ? parsedIgnorePaths : undefined,
+    };
+
     if (editingDomain) {
-      updateDomain(editingDomain.id, { url, label: label || undefined, folderId, protocol });
+      updateDomain(editingDomain.id, domainData);
     } else {
-      addDomain({ url, label: label || undefined, folderId, protocol });
+      addDomain(domainData);
     }
 
     onClose();
@@ -151,6 +175,23 @@ export function AddDomainModal({ isOpen, onClose, editingDomain }: AddDomainModa
               </select>
               <p className="text-xs text-muted-foreground mt-1.5">
                 Determines which protocol to use when swapping
+              </p>
+            </div>
+
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium mb-2">
+                <Scissors className="h-3.5 w-3.5 text-muted-foreground" />
+                Ignore Path Prefixes <span className="text-muted-foreground font-normal">(optional)</span>
+              </label>
+              <input
+                type="text"
+                value={ignorePaths}
+                onChange={(e) => setIgnorePaths(e.target.value)}
+                placeholder="he-il, en-us, staging"
+                className="input"
+              />
+              <p className="text-xs text-muted-foreground mt-1.5">
+                Comma-separated path prefixes to strip when swapping to this domain
               </p>
             </div>
 

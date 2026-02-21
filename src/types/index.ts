@@ -4,6 +4,7 @@ export interface Domain {
   label?: string;
   folderId: string | null;
   protocol?: 'http' | 'https' | 'preserve';
+  ignorePaths?: string[];
   order: number;
   createdAt: number;
   updatedAt: number;
@@ -51,6 +52,7 @@ export interface DomainInput {
   label?: string;
   folderId?: string | null;
   protocol?: 'http' | 'https' | 'preserve';
+  ignorePaths?: string[];
 }
 
 export interface FolderInput {

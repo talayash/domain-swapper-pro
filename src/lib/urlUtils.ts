@@ -61,6 +61,16 @@ export function buildSwapUrl(
   // - Between different ports (e.g., localhost:3000 → localhost:8080)
   newUrl.port = target.port || '';
 
+  if (targetDomain.ignorePaths && targetDomain.ignorePaths.length > 0) {
+    for (const ignorePath of targetDomain.ignorePaths) {
+      const prefix = '/' + ignorePath;
+      if (newUrl.pathname === prefix || newUrl.pathname.startsWith(prefix + '/')) {
+        newUrl.pathname = newUrl.pathname.slice(prefix.length) || '/';
+        break;
+      }
+    }
+  }
+
   return newUrl.toString();
 }
 

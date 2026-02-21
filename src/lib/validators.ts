@@ -62,6 +62,17 @@ export function validateLabel(label: string): ValidationResult {
   return { isValid: true };
 }
 
+export function validateIgnorePaths(paths: string[]): ValidationResult {
+  for (const path of paths) {
+    const trimmed = path.trim().replace(/^\/+/, '');
+    if (trimmed.length === 0) continue;
+    if (trimmed.length > 200) {
+      return { isValid: false, error: `Path prefix "${trimmed.slice(0, 20)}..." is too long` };
+    }
+  }
+  return { isValid: true };
+}
+
 export function validateImportData(data: unknown): ValidationResult {
   if (!data || typeof data !== 'object') {
     return { isValid: false, error: 'Invalid data format' };
