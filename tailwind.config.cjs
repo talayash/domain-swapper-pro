@@ -40,14 +40,9 @@ module.exports = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)"
       },
-      boxShadow: {
-        'soft': '0 2px 8px -2px rgba(0, 0, 0, 0.1)',
-        'glow': '0 0 20px -5px rgba(99, 102, 241, 0.4)'
-      },
       animation: {
-        'fade-in': 'fadeIn 0.2s ease-out',
-        'slide-up': 'slideUp 0.2s ease-out',
-        'scale-in': 'scaleIn 0.15s ease-out'
+        'fade-in': 'fadeIn 0.15s ease-out',
+        'slide-up': 'slideUp 0.15s ease-out'
       },
       keyframes: {
         fadeIn: {
@@ -57,10 +52,6 @@ module.exports = {
         slideUp: {
           '0%': { opacity: '0', transform: 'translateY(4px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' }
-        },
-        scaleIn: {
-          '0%': { opacity: '0', transform: 'scale(0.95)' },
-          '100%': { opacity: '1', transform: 'scale(1)' }
         }
       }
     }

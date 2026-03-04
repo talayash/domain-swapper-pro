@@ -44,12 +44,9 @@ function Options() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="max-w-3xl mx-auto py-8 px-4">
-        <div className="flex items-center gap-3 mb-8">
-          <span className="text-3xl">🔄</span>
-          <div>
-            <h1 className="text-2xl font-bold">Domain Swapper Pro</h1>
-            <p className="text-muted-foreground">Settings & Configuration</p>
-          </div>
+        <div className="mb-8">
+          <h1 className="text-xl font-medium">Domain Swapper Pro</h1>
+          <p className="text-sm text-muted-foreground mt-1">Settings</p>
         </div>
 
         <Tabs.Root value={activeTab} onValueChange={setActiveTab}>

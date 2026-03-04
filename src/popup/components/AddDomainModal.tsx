@@ -95,10 +95,8 @@ export function AddDomainModal({ isOpen, onClose, editingDomain }: AddDomainModa
         <Dialog.Overlay className="modal-overlay" />
         <Dialog.Content className="modal-content">
           <div className="flex items-center justify-between mb-5">
-            <Dialog.Title className="text-lg font-semibold flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-primary/10">
-                <Globe className="h-4 w-4 text-primary" />
-              </div>
+            <Dialog.Title className="text-base font-medium flex items-center gap-2">
+              <Globe className="h-4 w-4 text-muted-foreground" />
               {editingDomain ? 'Edit Domain' : 'Add Domain'}
             </Dialog.Title>
             <Dialog.Close asChild>
@@ -196,7 +194,7 @@ export function AddDomainModal({ isOpen, onClose, editingDomain }: AddDomainModa
             </div>
 
             {error && (
-              <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg border border-destructive/20">
+              <div className="text-sm text-destructive bg-destructive/5 p-2.5 rounded-md">
                 {error}
               </div>
             )}
