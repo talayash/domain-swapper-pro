@@ -1,7 +1,7 @@
 {
   "name": "domain-swapper-pro",
   "displayName": "Domain Swapper Pro",
-  "version": "1.2.0",
+  "version": "1.4.0",
   "description": "Quickly switch between environments (dev, staging, QA, production) while preserving URL paths",
   "type": "module",
   "scripts": {
@@ -21,6 +21,7 @@
     "@radix-ui/react-tabs": "^1.0.4",
     "fuse.js": "^7.0.0",
     "lucide-react": "^0.294.0",
+    "qrcode": "^1.5.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "uuid": "^9.0.1",
@@ -30,6 +31,7 @@
     "@crxjs/vite-plugin": "^2.0.0-beta.23",
     "@types/chrome": "^0.0.254",
     "@types/node": "^20.10.4",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.17",
     "@types/uuid": "^9.0.7",

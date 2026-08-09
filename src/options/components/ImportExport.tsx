@@ -94,8 +94,8 @@ export function ImportExport() {
           </div>
 
           <p className="text-sm text-muted-foreground">
-            Export your domains, folders, and settings to a JSON file for backup or transfer
-            between browsers.
+            Export your domains, folders, profiles, and settings to a JSON file for backup or
+            transfer between browsers.
           </p>
         </div>
       </div>

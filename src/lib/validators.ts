@@ -73,6 +73,56 @@ export function validateIgnorePaths(paths: string[]): ValidationResult {
   return { isValid: true };
 }
 
+export function validateProfileName(name: string): ValidationResult {
+  if (!name || name.trim().length === 0) {
+    return { isValid: false, error: 'Profile name is required' };
+  }
+  if (name.trim().length > 80) {
+    return { isValid: false, error: 'Profile name must be 80 characters or less' };
+  }
+  return { isValid: true };
+}
+
+export function validateProfileDescription(description: string): ValidationResult {
+  if (description && description.length > 200) {
+    return { isValid: false, error: 'Description must be 200 characters or less' };
+  }
+  return { isValid: true };
+}
+
+const VALID_ROLES = ['production', 'staging', 'qa', 'dev', 'local', 'custom'];
+
+export function validateProfileImport(data: unknown): ValidationResult {
+  if (!data || typeof data !== 'object') {
+    return { isValid: false, error: 'Invalid profile data' };
+  }
+
+  const obj = data as Record<string, unknown>;
+
+  if (!obj.name || typeof obj.name !== 'string') {
+    return { isValid: false, error: 'Profile must have a name' };
+  }
+
+  if (!Array.isArray(obj.entries) || obj.entries.length === 0) {
+    return { isValid: false, error: 'Profile must have at least one environment entry' };
+  }
+
+  for (const entry of obj.entries) {
+    if (!entry || typeof entry !== 'object') {
+      return { isValid: false, error: 'Invalid profile entry' };
+    }
+    const e = entry as Record<string, unknown>;
+    if (!e.url || typeof e.url !== 'string') {
+      return { isValid: false, error: 'Each entry must have a URL' };
+    }
+    if (!e.role || !VALID_ROLES.includes(e.role as string)) {
+      return { isValid: false, error: `Invalid role: ${e.role}` };
+    }
+  }
+
+  return { isValid: true };
+}
+
 export function validateImportData(data: unknown): ValidationResult {
   if (!data || typeof data !== 'object') {
     return { isValid: false, error: 'Invalid data format' };

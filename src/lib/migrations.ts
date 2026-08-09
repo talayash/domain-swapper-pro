@@ -1,8 +1,8 @@
-import type { AppState, Domain, Folder, Settings } from '~/types';
+import type { AppState, Domain, Folder, Profile, Settings } from '~/types';
 import { DEFAULT_SETTINGS, DEFAULT_FOLDERS } from '~/types';
 import { v4 as uuidv4 } from 'uuid';
 
-const CURRENT_VERSION = 1;
+const CURRENT_VERSION = 2;
 
 interface LegacyDomain {
   domain?: string;
@@ -16,6 +16,7 @@ interface StoredData {
   folders?: Folder[];
   settings?: Partial<Settings>;
   recentDomains?: string[];
+  profiles?: Profile[];
 }
 
 export function migrateData(data: StoredData): AppState {
@@ -27,11 +28,16 @@ export function migrateData(data: StoredData): AppState {
     migratedData = migrateToV1(migratedData);
   }
 
+  if (version < 2) {
+    migratedData = migrateToV2(migratedData);
+  }
+
   return {
     domains: (migratedData.domains as Domain[]) || [],
     folders: migratedData.folders || [...DEFAULT_FOLDERS],
     settings: { ...DEFAULT_SETTINGS, ...migratedData.settings },
-    recentDomains: migratedData.recentDomains || []
+    recentDomains: migratedData.recentDomains || [],
+    profiles: migratedData.profiles || []
   };
 }
 
@@ -72,12 +78,21 @@ function migrateToV1(data: StoredData): StoredData {
   };
 }
 
+function migrateToV2(data: StoredData): StoredData {
+  return {
+    ...data,
+    version: 2,
+    profiles: data.profiles || []
+  };
+}
+
 export function getExportData(state: AppState): object {
   return {
     version: CURRENT_VERSION,
     exportedAt: new Date().toISOString(),
     domains: state.domains,
     folders: state.folders,
-    settings: state.settings
+    settings: state.settings,
+    profiles: state.profiles
   };
 }

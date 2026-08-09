@@ -33,11 +33,54 @@ export interface Settings {
   syncEnabled: boolean;
 }
 
+export type EnvironmentRole = 'production' | 'staging' | 'qa' | 'dev' | 'local' | 'custom';
+
+export interface EnvironmentRoleConfig {
+  label: string;
+  color: string;
+  shortLabel: string;
+  dotColor: string;
+}
+
+export const ENVIRONMENT_ROLES: Record<EnvironmentRole, EnvironmentRoleConfig> = {
+  production: { label: 'Production', color: 'green', shortLabel: 'PROD', dotColor: '#22c55e' },
+  staging:    { label: 'Staging',    color: 'yellow', shortLabel: 'STG', dotColor: '#eab308' },
+  qa:         { label: 'QA',         color: 'blue', shortLabel: 'QA', dotColor: '#3b82f6' },
+  dev:        { label: 'Dev',        color: 'red', shortLabel: 'DEV', dotColor: '#ef4444' },
+  local:      { label: 'Local',      color: 'gray', shortLabel: 'LOCAL', dotColor: '#6b7280' },
+  custom:     { label: 'Custom',     color: 'purple', shortLabel: 'CUSTOM', dotColor: '#a855f7' },
+};
+
+export interface ProfileDomainEntry {
+  id: string;
+  url: string;
+  label?: string;
+  role: EnvironmentRole;
+  protocol?: 'http' | 'https' | 'preserve';
+  order: number;
+}
+
+export interface Profile {
+  id: string;
+  name: string;
+  description?: string;
+  entries: ProfileDomainEntry[];
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface ProfileInput {
+  name: string;
+  description?: string;
+  entries: Omit<ProfileDomainEntry, 'id' | 'order'>[];
+}
+
 export interface AppState {
   domains: Domain[];
   folders: Folder[];
   settings: Settings;
   recentDomains: string[];
+  profiles: Profile[];
 }
 
 export interface ParsedDomain {

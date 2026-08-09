@@ -4,12 +4,13 @@ import { DEFAULT_SETTINGS, DEFAULT_FOLDERS } from '~/types';
 import { createDomainsSlice, type DomainsSlice } from './slices/domains';
 import { createFoldersSlice, type FoldersSlice } from './slices/folders';
 import { createSettingsSlice, type SettingsSlice } from './slices/settings';
+import { createProfilesSlice, type ProfilesSlice } from './slices/profiles';
 import { chromeStorage, loadFromStorage, syncToCloudStorage } from './middleware/chromeStorage';
 import { migrateData, getExportData } from '~/lib/migrations';
 
 const STORAGE_KEY = 'domain-swapper-pro';
 
-export type StoreState = DomainsSlice & FoldersSlice & SettingsSlice & {
+export type StoreState = DomainsSlice & FoldersSlice & SettingsSlice & ProfilesSlice & {
   isLoaded: boolean;
   loadState: () => Promise<void>;
   importData: (data: unknown) => void;
@@ -23,6 +24,7 @@ export const useStore = create<StoreState>()(
       ...createDomainsSlice(set, get, api),
       ...createFoldersSlice(set, get, api),
       ...createSettingsSlice(set, get, api),
+      ...createProfilesSlice(set, get, api),
 
       isLoaded: false,
 
@@ -36,6 +38,7 @@ export const useStore = create<StoreState>()(
             folders: migrated.folders.length > 0 ? migrated.folders : [...DEFAULT_FOLDERS],
             settings: migrated.settings,
             recentDomains: migrated.recentDomains,
+            profiles: migrated.profiles || [],
             isLoaded: true
           });
         } else {
@@ -44,6 +47,7 @@ export const useStore = create<StoreState>()(
             folders: [...DEFAULT_FOLDERS],
             settings: { ...DEFAULT_SETTINGS },
             recentDomains: [],
+            profiles: [],
             isLoaded: true
           });
         }
@@ -55,7 +59,8 @@ export const useStore = create<StoreState>()(
           domains: migrated.domains,
           folders: migrated.folders.length > 0 ? migrated.folders : [...DEFAULT_FOLDERS],
           settings: migrated.settings,
-          recentDomains: migrated.recentDomains
+          recentDomains: migrated.recentDomains,
+          profiles: migrated.profiles || []
         });
       },
 
@@ -65,7 +70,8 @@ export const useStore = create<StoreState>()(
           domains: state.domains,
           folders: state.folders,
           settings: state.settings,
-          recentDomains: state.recentDomains
+          recentDomains: state.recentDomains,
+          profiles: state.profiles
         });
       },
 
@@ -75,7 +81,8 @@ export const useStore = create<StoreState>()(
           domains: state.domains,
           folders: state.folders,
           settings: state.settings,
-          recentDomains: state.recentDomains
+          recentDomains: state.recentDomains,
+          profiles: state.profiles
         };
         await syncToCloudStorage(STORAGE_KEY, data);
       }

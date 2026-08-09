@@ -5,6 +5,8 @@ import { GripVertical, ExternalLink, Pencil, Trash2 } from 'lucide-react';
 import type { Domain } from '~/types';
 import { useStore } from '~/store';
 import { extractDisplayDomain, buildSwapUrl, getCurrentTabUrl, navigateToUrl } from '~/lib/urlUtils';
+import { useProfileRoleForDomain } from '../hooks/useEnvironmentDetection';
+import { EnvironmentBadge } from './EnvironmentBadge';
 
 interface DomainItemProps {
   domain: Domain;
@@ -16,6 +18,7 @@ export function DomainItem({ domain, onEdit }: DomainItemProps) {
   const settings = useStore((state) => state.settings);
   const deleteDomain = useStore((state) => state.deleteDomain);
   const addToRecent = useStore((state) => state.addToRecent);
+  const profileRole = useProfileRoleForDomain(domain.url);
 
   const {
     attributes,
@@ -74,9 +77,12 @@ export function DomainItem({ domain, onEdit }: DomainItemProps) {
       </button>
 
       <div className="flex-1 min-w-0">
-        {domain.label && (
-          <div className="text-sm font-medium truncate text-foreground">{domain.label}</div>
-        )}
+        <div className="flex items-center gap-1.5">
+          {domain.label && (
+            <span className="text-sm font-medium truncate text-foreground">{domain.label}</span>
+          )}
+          {profileRole && <EnvironmentBadge role={profileRole.role} size="sm" showLabel={false} />}
+        </div>
         <div className={`truncate ${domain.label ? 'text-xs text-muted-foreground' : 'text-sm text-foreground'}`}>
           {displayUrl}
         </div>

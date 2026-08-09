@@ -18,9 +18,12 @@ import type { Domain, Folder } from '~/types';
 import { useStore } from '~/store';
 import { useRootFolders } from '../hooks/useFolders';
 import { useDomainsByFolder } from '../hooks/useDomains';
+import { useCurrentTabUrl } from '../hooks/useCurrentTabUrl';
+import { useEnvironmentDetection } from '../hooks/useEnvironmentDetection';
 import { SearchBar } from './SearchBar';
 import { FolderItem } from './FolderItem';
 import { DomainItem } from './DomainItem';
+import { EnvironmentLadder } from './EnvironmentLadder';
 import { AddDomainModal } from './AddDomainModal';
 import { AddFolderModal } from './AddFolderModal';
 
@@ -31,6 +34,9 @@ export function DomainList() {
   const [editingDomain, setEditingDomain] = useState<Domain | null>(null);
   const [editingFolder, setEditingFolder] = useState<Folder | null>(null);
   const [subfolderParentId, setSubfolderParentId] = useState<string | null>(null);
+
+  const currentTabUrl = useCurrentTabUrl();
+  const envMatch = useEnvironmentDetection(currentTabUrl);
 
   const rootFolders = useRootFolders();
   const uncategorizedDomains = useDomainsByFolder(null);
@@ -127,6 +133,11 @@ export function DomainList() {
         </div>
         <SearchBar value={searchQuery} onChange={setSearchQuery} />
       </div>
+
+      {/* Environment Ladder */}
+      {envMatch && currentTabUrl && (
+        <EnvironmentLadder match={envMatch} currentTabUrl={currentTabUrl} />
+      )}
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto scrollbar-thin p-2">

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import * as Tabs from '@radix-ui/react-tabs';
-import { Settings, Keyboard, Download } from 'lucide-react';
+import { Settings, Keyboard, Download, Layers } from 'lucide-react';
 import { useStore } from '~/store';
 import { Preferences } from './components/Preferences';
 import { KeyboardShortcuts } from './components/KeyboardShortcuts';
 import { ImportExport } from './components/ImportExport';
+import { Profiles } from './components/Profiles';
 import '~/styles/globals.css';
 
 function Options() {
@@ -66,6 +67,13 @@ function Options() {
               Shortcuts
             </Tabs.Trigger>
             <Tabs.Trigger
+              value="profiles"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary transition-colors"
+            >
+              <Layers className="h-4 w-4" />
+              Profiles
+            </Tabs.Trigger>
+            <Tabs.Trigger
               value="import-export"
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary transition-colors"
             >
@@ -80,6 +88,10 @@ function Options() {
 
           <Tabs.Content value="shortcuts" className="outline-none">
             <KeyboardShortcuts />
+          </Tabs.Content>
+
+          <Tabs.Content value="profiles" className="outline-none">
+            <Profiles />
           </Tabs.Content>
 
           <Tabs.Content value="import-export" className="outline-none">
