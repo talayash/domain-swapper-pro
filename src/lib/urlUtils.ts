@@ -1,4 +1,4 @@
-import type { Domain, ParsedDomain, ProfileDomainEntry, Settings } from '~/types';
+import type { Domain, ParsedDomain, ProfileDomainEntry, Settings, SwapTarget } from '~/types';
 
 /**
  * Parse a user-entered domain string such as `example.com`,
@@ -169,6 +169,33 @@ export function navigateToUrl(url: string): Promise<void> {
       }
     });
   });
+}
+
+/**
+ * Open `url` in a fresh, focused browser window (for side-by-side comparison).
+ * `chrome.windows` needs no extra permission.
+ */
+export function openUrlInNewWindow(url: string): Promise<void> {
+  return new Promise((resolve) => {
+    chrome.windows.create({ url, focused: true }, () => resolve());
+  });
+}
+
+/**
+ * Open a swapped URL according to `target`. Single dispatcher shared by the
+ * popup (`useSwap`) and the background handlers (quick-swap, context menu).
+ * Unknown values (e.g. stored settings from before `openBehavior` existed)
+ * fall back to navigating the current tab.
+ */
+export function openSwapUrl(url: string, target: SwapTarget | undefined): Promise<void> {
+  switch (target) {
+    case 'newTab':
+      return openUrlInNewTab(url);
+    case 'newWindow':
+      return openUrlInNewWindow(url);
+    default:
+      return navigateToUrl(url);
+  }
 }
 
 /**

@@ -1,6 +1,6 @@
 import type { Domain, Folder, Profile, Settings } from '~/types';
 import { ENVIRONMENT_ROLES } from '~/types';
-import { buildSwapUrl, isSwappableUrl, profileEntryToDomain } from '~/lib/urlUtils';
+import { buildSwapUrl, isSwappableUrl, openSwapUrl, profileEntryToDomain } from '~/lib/urlUtils';
 
 const ROOT_MENU_ID = 'domain-swapper-root';
 const STORAGE_KEY = 'domain-swapper-pro';
@@ -214,7 +214,7 @@ function handleProfileEntryClick(
     const newUrl = buildSwapUrl(currentUrl, profileEntryToDomain(entry), state.settings);
 
     if (tab?.id) {
-      chrome.tabs.update(tab.id, { url: newUrl });
+      openSwapUrl(newUrl, state.settings.openBehavior);
     }
   });
 }
@@ -239,7 +239,7 @@ function handleDomainClick(
     const newUrl = buildSwapUrl(currentUrl, domain, state.settings);
 
     if (tab?.id) {
-      chrome.tabs.update(tab.id, { url: newUrl });
+      openSwapUrl(newUrl, state.settings.openBehavior);
 
       const recentDomains = [
         domainId,

@@ -14,7 +14,7 @@ import {
   verticalListSortingStrategy
 } from '@dnd-kit/sortable';
 import { Plus, FolderPlus, Settings, Globe, SearchX } from 'lucide-react';
-import type { Domain, Folder } from '~/types';
+import type { Domain, Folder, SwapTarget } from '~/types';
 import { useStore } from '~/store';
 import { profileEntryToDomain } from '~/lib/urlUtils';
 import { useRootFolders } from '../hooks/useFolders';
@@ -45,7 +45,7 @@ export function DomainList() {
 
   const currentTabUrl = useCurrentTabUrl();
   const envMatch = useEnvironmentDetection(currentTabUrl);
-  const swap = useSwap();
+  const { swap, targetFor } = useSwap();
 
   const rootFolders = useRootFolders();
   const uncategorizedDomains = useDomainsByFolder(null);
@@ -72,11 +72,11 @@ export function DomainList() {
     el?.scrollIntoView({ block: 'nearest' });
   }, [activeRow]);
 
-  const swapRow = (row: PopupRow, newTab: boolean) => {
+  const swapRow = (row: PopupRow, target: SwapTarget) => {
     if (row.kind === 'domain') {
-      swap(row.domain, { newTab, trackRecent: true });
+      swap(row.domain, { target, trackRecent: true });
     } else {
-      swap(profileEntryToDomain(row.entry), { newTab });
+      swap(profileEntryToDomain(row.entry), { target });
     }
   };
 
@@ -113,7 +113,7 @@ export function DomainList() {
         // Only hijack Enter from the search box, so buttons keep working.
         if (activeRow && e.target === searchInputRef.current) {
           e.preventDefault();
-          swapRow(activeRow, e.ctrlKey || e.metaKey);
+          swapRow(activeRow, targetFor(e));
         }
         break;
       case 'Escape':

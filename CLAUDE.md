@@ -32,13 +32,13 @@ Zustand store composed of four slices (`src/store/slices/`): `domains`, `folders
 
 ### URL Swap Flow
 
-When a user clicks a domain: get current tab URL → `parseDomainInput()` extracts target hostname/port/protocol (lowercased, path stripped) → `buildSwapUrl()` preserves path+query and applies protocol rules → navigate tab (or `openUrlInNewTab` on Ctrl/middle-click) → track in `recentDomains` (max 5). Core logic lives in `src/lib/urlUtils.ts`. Environment detection (popup ladder, item badges, toolbar badge) matches on `getHostKey()` = `hostname[:port]`, the single shared predicate. Profile entries are adapted for swapping via `profileEntryToDomain()`.
+When a user clicks a domain: get current tab URL → `parseDomainInput()` extracts target hostname/port/protocol (lowercased, path stripped) → `buildSwapUrl()` preserves path+query and applies protocol rules → `openSwapUrl()` opens it in the current tab, a new tab, or a new window → track in `recentDomains` (max 5). The target comes from `settings.openBehavior` unless a modifier overrides it: Shift = new window, Ctrl/Cmd/middle-click toggles new tab (`resolveSwapTarget()` in `useSwap`). Background handlers (quick-swap, context menu) also go through `openSwapUrl()` and honor the setting. Core logic lives in `src/lib/urlUtils.ts`. Environment detection (popup ladder, item badges, toolbar badge) matches on `getHostKey()` = `hostname[:port]`, the single shared predicate. Profile entries are adapted for swapping via `profileEntryToDomain()`.
 
 ### Data Model
 
 - **Domain**: URL + optional label, per-domain protocol setting (`http`/`https`/`preserve`), belongs to optional folder, has sort order.
 - **Folder**: Supports nesting via `parentId`, has icon/color, collapsible.
-- **Settings**: Theme (`light`/`dark`/`system`), `forceHttps`, keyboard shortcuts, sync toggle.
+- **Settings**: Theme (`light`/`dark`/`system`), `forceHttps`, `openBehavior` (`current`/`newTab`/`newWindow`), keyboard shortcuts, sync toggle.
 
 ### Key Patterns
 

@@ -1,5 +1,5 @@
 import type { Domain, Settings } from '~/types';
-import { buildSwapUrl, isSwappableUrl } from '~/lib/urlUtils';
+import { buildSwapUrl, isSwappableUrl, openSwapUrl } from '~/lib/urlUtils';
 
 const STORAGE_KEY = 'domain-swapper-pro';
 
@@ -34,5 +34,5 @@ async function handleQuickSwap() {
   if (!tab?.id || !isSwappableUrl(tab.url)) return;
 
   const newUrl = buildSwapUrl(tab.url, domain, state.settings);
-  await chrome.tabs.update(tab.id, { url: newUrl });
+  await openSwapUrl(newUrl, state.settings.openBehavior);
 }

@@ -21,10 +21,15 @@ export interface Folder {
   createdAt: number;
 }
 
+/** Where a swapped URL is opened. */
+export type SwapTarget = 'current' | 'newTab' | 'newWindow';
+
 export interface Settings {
   theme: 'light' | 'dark' | 'system';
   forceHttps: boolean;
   showProtocol: boolean;
+  /** Default target for a plain click / Enter. Modifier keys override it per swap. */
+  openBehavior: SwapTarget;
   defaultFolderId: string | null;
   keyboardShortcuts: {
     openPopup: string;
@@ -109,6 +114,7 @@ export const DEFAULT_SETTINGS: Settings = {
   theme: 'system',
   forceHttps: false,
   showProtocol: true,
+  openBehavior: 'current',
   defaultFolderId: null,
   keyboardShortcuts: {
     openPopup: 'Alt+D',

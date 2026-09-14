@@ -23,7 +23,7 @@
 | **Port Support** | Full support for localhost and custom ports (e.g., `localhost:3000`) |
 | **Keyboard Shortcuts** | `Alt+D` to open, `Alt+Shift+D` for quick swap to last used domain |
 | **Keyboard-First Popup** | Type to filter, `↑`/`↓` to choose, `Enter` to swap, `Ctrl+Enter` for a new tab — no mouse needed |
-| **Open in New Tab** | `Ctrl+click` or middle-click any domain to swap into a new tab |
+| **Open in New Tab or Window** | `Ctrl+click` / middle-click swaps into a new tab, `Shift+click` into a new window; or set the default in Preferences to compare Prod and Dev side by side |
 | **Folder Organization** | Group related domains with nested subfolders |
 | **Drag & Drop** | Reorder domains and folders with ease |
 | **Fuzzy Search** | Find domains quickly with smart search; matching folders expand automatically |
@@ -85,7 +85,9 @@
 
 - **Click** any domain in the list to swap your current tab's URL
 - **Ctrl+click** (or middle-click) a domain to open the swapped URL in a new tab
-- **Keyboard only:** press `Alt+D`, start typing, use `↑`/`↓` to highlight a domain, then `Enter` (or `Ctrl+Enter` for a new tab). `Esc` clears the search, then closes the popup
+- **Shift+click** a domain to open the swapped URL in a new window
+- Prefer new tabs or windows every time? Set **Open swapped URL in** under Options → Preferences; it also applies to the context menu and quick swap
+- **Keyboard only:** press `Alt+D`, start typing, use `↑`/`↓` to highlight a domain, then `Enter` (or `Ctrl+Enter` for a new tab, `Shift+Enter` for a new window). `Esc` clears the search, then closes the popup
 - **Right-click** on any page and use the context menu
 - Press **Alt+Shift+D** to instantly swap to your last used domain
 
@@ -114,6 +116,7 @@
 | `↑` / `↓` | Move the highlight between domains |
 | `Enter` | Swap the current tab to the highlighted domain |
 | `Ctrl+Enter` | Open the swapped URL in a new tab |
+| `Shift+Enter` | Open the swapped URL in a new window |
 | `Esc` | Clear the search, then close the popup |
 
 ---

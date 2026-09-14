@@ -2,7 +2,7 @@ import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import type { ProfileDomainEntry } from '~/types';
 import { extractDisplayDomain, profileEntryToDomain } from '~/lib/urlUtils';
-import { useSwap, wantsNewTab } from '../hooks/useSwap';
+import { useSwap, SWAP_HINT } from '../hooks/useSwap';
 import { useIsActiveRow } from '../hooks/usePopupNav';
 import { EnvironmentBadge } from './EnvironmentBadge';
 import type { EnvironmentMatch } from '../hooks/useEnvironmentDetection';
@@ -12,17 +12,17 @@ interface EnvironmentLadderProps {
 }
 
 function LadderEntry({ entry }: { entry: ProfileDomainEntry }) {
-  const swap = useSwap();
+  const { swap, targetFor } = useSwap();
   const isActive = useIsActiveRow(entry.id);
 
   const handleClick = (e: React.MouseEvent) => {
-    swap(profileEntryToDomain(entry), { newTab: wantsNewTab(e) });
+    swap(profileEntryToDomain(entry), { target: targetFor(e) });
   };
 
   const handleAuxClick = (e: React.MouseEvent) => {
     if (e.button !== 1) return;
     e.preventDefault();
-    swap(profileEntryToDomain(entry), { newTab: true });
+    swap(profileEntryToDomain(entry), { target: targetFor(e) });
   };
 
   return (
@@ -33,7 +33,7 @@ function LadderEntry({ entry }: { entry: ProfileDomainEntry }) {
       data-row-id={entry.id}
       data-active={isActive || undefined}
       className="ladder-entry group"
-      title="Click to swap · Ctrl+click or middle-click for a new tab"
+      title={SWAP_HINT}
     >
       <EnvironmentBadge role={entry.role} size="sm" />
       <span className="text-xs text-foreground truncate flex-1">

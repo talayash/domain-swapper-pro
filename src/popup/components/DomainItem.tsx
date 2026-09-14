@@ -6,7 +6,7 @@ import type { Domain } from '~/types';
 import { useStore } from '~/store';
 import { extractDisplayDomain } from '~/lib/urlUtils';
 import { useProfileRoleForDomain } from '../hooks/useEnvironmentDetection';
-import { useSwap, wantsNewTab } from '../hooks/useSwap';
+import { useSwap, SWAP_HINT } from '../hooks/useSwap';
 import { useIsActiveRow } from '../hooks/usePopupNav';
 import { EnvironmentBadge } from './EnvironmentBadge';
 
@@ -19,7 +19,7 @@ export function DomainItem({ domain, onEdit }: DomainItemProps) {
   const showProtocol = useStore((state) => state.settings.showProtocol);
   const deleteDomain = useStore((state) => state.deleteDomain);
   const profileRole = useProfileRoleForDomain(domain.url);
-  const swap = useSwap();
+  const { swap, targetFor } = useSwap();
   const isActive = useIsActiveRow(domain.id);
 
   const {
@@ -38,14 +38,14 @@ export function DomainItem({ domain, onEdit }: DomainItemProps) {
   };
 
   const handleClick = (e: React.MouseEvent) => {
-    swap(domain, { newTab: wantsNewTab(e), trackRecent: true });
+    swap(domain, { target: targetFor(e), trackRecent: true });
   };
 
   // Middle-click fires `auxclick`, not `click`.
   const handleAuxClick = (e: React.MouseEvent) => {
     if (e.button !== 1) return;
     e.preventDefault();
-    swap(domain, { newTab: true, trackRecent: true });
+    swap(domain, { target: targetFor(e), trackRecent: true });
   };
 
   const handleDelete = (e: React.MouseEvent) => {
@@ -71,7 +71,7 @@ export function DomainItem({ domain, onEdit }: DomainItemProps) {
       data-active={isActive || undefined}
       onClick={handleClick}
       onAuxClick={handleAuxClick}
-      title="Click to swap · Ctrl+click or middle-click for a new tab"
+      title={SWAP_HINT}
     >
       <button
         type="button"

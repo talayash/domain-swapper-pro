@@ -1,5 +1,6 @@
 import * as Switch from '@radix-ui/react-switch';
 import { useStore } from '~/store';
+import type { SwapTarget } from '~/types';
 
 export function Preferences() {
   const settings = useStore((state) => state.settings);
@@ -37,6 +38,28 @@ export function Preferences() {
             >
               <Switch.Thumb className="block w-4 h-4 bg-white rounded-full transition-transform translate-x-0.5 data-[state=checked]:translate-x-5" />
             </Switch.Root>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-lg font-medium mb-4">Swapping</h3>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">Open swapped URL in</label>
+            <select
+              value={settings.openBehavior}
+              onChange={(e) => updateSettings({ openBehavior: e.target.value as SwapTarget })}
+              className="input w-48"
+            >
+              <option value="current">Current tab</option>
+              <option value="newTab">New tab</option>
+              <option value="newWindow">New window</option>
+            </select>
+            <p className="text-xs text-muted-foreground mt-2">
+              Applies to plain clicks, Enter, the context menu and quick swap.
+              Ctrl+click / middle-click toggles a new tab, Shift+click opens a new window.
+            </p>
           </div>
         </div>
       </div>
