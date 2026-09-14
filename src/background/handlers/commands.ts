@@ -1,5 +1,5 @@
 import type { Domain, Settings } from '~/types';
-import { buildSwapUrl } from '~/lib/urlUtils';
+import { buildSwapUrl, isSwappableUrl } from '~/lib/urlUtils';
 
 const STORAGE_KEY = 'domain-swapper-pro';
 
@@ -9,6 +9,8 @@ interface StoredState {
   recentDomains: string[];
 }
 
+// Note: opening the popup is handled natively by Chrome through the reserved
+// `_execute_action` command in manifest.json; it never reaches this handler.
 export function handleCommand(command: string) {
   if (command === 'quick-swap') {
     handleQuickSwap();
@@ -29,7 +31,7 @@ async function handleQuickSwap() {
   if (!domain) return;
 
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (!tab?.url || !tab.url.startsWith('http') || !tab.id) return;
+  if (!tab?.id || !isSwappableUrl(tab.url)) return;
 
   const newUrl = buildSwapUrl(tab.url, domain, state.settings);
   await chrome.tabs.update(tab.id, { url: newUrl });

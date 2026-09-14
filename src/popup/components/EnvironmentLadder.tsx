@@ -1,35 +1,50 @@
+import React from 'react';
 import { ArrowRight } from 'lucide-react';
-import type { ProfileDomainEntry, Domain } from '~/types';
-import { useStore } from '~/store';
-import { buildSwapUrl, navigateToUrl, extractDisplayDomain } from '~/lib/urlUtils';
+import type { ProfileDomainEntry } from '~/types';
+import { extractDisplayDomain, profileEntryToDomain } from '~/lib/urlUtils';
+import { useSwap, wantsNewTab } from '../hooks/useSwap';
+import { useIsActiveRow } from '../hooks/usePopupNav';
 import { EnvironmentBadge } from './EnvironmentBadge';
 import type { EnvironmentMatch } from '../hooks/useEnvironmentDetection';
 
 interface EnvironmentLadderProps {
   match: EnvironmentMatch;
-  currentTabUrl: string;
 }
 
-export function EnvironmentLadder({ match, currentTabUrl }: EnvironmentLadderProps) {
-  const settings = useStore((state) => state.settings);
+function LadderEntry({ entry }: { entry: ProfileDomainEntry }) {
+  const swap = useSwap();
+  const isActive = useIsActiveRow(entry.id);
 
-  const handleSwap = async (entry: ProfileDomainEntry) => {
-    const tempDomain: Domain = {
-      id: entry.id,
-      url: entry.url,
-      label: entry.label,
-      folderId: null,
-      protocol: entry.protocol || 'preserve',
-      order: 0,
-      createdAt: 0,
-      updatedAt: 0,
-    };
-
-    const newUrl = buildSwapUrl(currentTabUrl, tempDomain, settings);
-    await navigateToUrl(newUrl);
-    window.close();
+  const handleClick = (e: React.MouseEvent) => {
+    swap(profileEntryToDomain(entry), { newTab: wantsNewTab(e) });
   };
 
+  const handleAuxClick = (e: React.MouseEvent) => {
+    if (e.button !== 1) return;
+    e.preventDefault();
+    swap(profileEntryToDomain(entry), { newTab: true });
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      onAuxClick={handleAuxClick}
+      data-row-id={entry.id}
+      data-active={isActive || undefined}
+      className="ladder-entry group"
+      title="Click to swap · Ctrl+click or middle-click for a new tab"
+    >
+      <EnvironmentBadge role={entry.role} size="sm" />
+      <span className="text-xs text-foreground truncate flex-1">
+        {entry.label || extractDisplayDomain(entry.url, false)}
+      </span>
+      <ArrowRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 group-data-[active]:opacity-100 transition-opacity shrink-0" />
+    </button>
+  );
+}
+
+export function EnvironmentLadder({ match }: EnvironmentLadderProps) {
   return (
     <div className="mx-2 mb-2 rounded-lg border bg-card p-2.5">
       <div className="flex items-center gap-2 mb-2">
@@ -49,22 +64,9 @@ export function EnvironmentLadder({ match, currentTabUrl }: EnvironmentLadderPro
       )}
 
       <div className="space-y-0.5">
-        {match.otherEntries.map((entry) => {
-          return (
-            <button
-              key={entry.id}
-              onClick={() => handleSwap(entry)}
-              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left
-                         hover:bg-secondary/60 transition-colors duration-100 group"
-            >
-              <EnvironmentBadge role={entry.role} size="sm" />
-              <span className="text-xs text-foreground truncate flex-1">
-                {entry.label || extractDisplayDomain(entry.url, false)}
-              </span>
-              <ArrowRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
-            </button>
-          );
-        })}
+        {match.otherEntries.map((entry) => (
+          <LadderEntry key={entry.id} entry={entry} />
+        ))}
       </div>
     </div>
   );

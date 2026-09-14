@@ -20,7 +20,8 @@ interface CompactProfile {
 export function encodeProfile(profile: Profile): string {
   const compact: CompactProfile = {
     n: profile.name,
-    e: profile.entries
+    // Copy before sorting: `profile` is live store state and must not be mutated.
+    e: [...profile.entries]
       .sort((a, b) => a.order - b.order)
       .map((entry) => {
         const e: CompactEntry = { u: entry.url, r: entry.role };

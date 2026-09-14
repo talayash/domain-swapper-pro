@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, ExternalLink, Pencil, Trash2 } from 'lucide-react';
 import type { Domain } from '~/types';
 import { useStore } from '~/store';
-import { extractDisplayDomain, buildSwapUrl, getCurrentTabUrl, navigateToUrl } from '~/lib/urlUtils';
+import { extractDisplayDomain } from '~/lib/urlUtils';
 import { useProfileRoleForDomain } from '../hooks/useEnvironmentDetection';
+import { useSwap, wantsNewTab } from '../hooks/useSwap';
+import { useIsActiveRow } from '../hooks/usePopupNav';
 import { EnvironmentBadge } from './EnvironmentBadge';
 
 interface DomainItemProps {
@@ -14,11 +16,11 @@ interface DomainItemProps {
 }
 
 export function DomainItem({ domain, onEdit }: DomainItemProps) {
-  const [isHovered, setIsHovered] = useState(false);
-  const settings = useStore((state) => state.settings);
+  const showProtocol = useStore((state) => state.settings.showProtocol);
   const deleteDomain = useStore((state) => state.deleteDomain);
-  const addToRecent = useStore((state) => state.addToRecent);
   const profileRole = useProfileRoleForDomain(domain.url);
+  const swap = useSwap();
+  const isActive = useIsActiveRow(domain.id);
 
   const {
     attributes,
@@ -35,14 +37,15 @@ export function DomainItem({ domain, onEdit }: DomainItemProps) {
     opacity: isDragging ? 0.5 : 1
   };
 
-  const handleSwap = async () => {
-    const currentUrl = await getCurrentTabUrl();
-    if (!currentUrl || !currentUrl.startsWith('http')) return;
+  const handleClick = (e: React.MouseEvent) => {
+    swap(domain, { newTab: wantsNewTab(e), trackRecent: true });
+  };
 
-    const newUrl = buildSwapUrl(currentUrl, domain, settings);
-    addToRecent(domain.id);
-    await navigateToUrl(newUrl);
-    window.close();
+  // Middle-click fires `auxclick`, not `click`.
+  const handleAuxClick = (e: React.MouseEvent) => {
+    if (e.button !== 1) return;
+    e.preventDefault();
+    swap(domain, { newTab: true, trackRecent: true });
   };
 
   const handleDelete = (e: React.MouseEvent) => {
@@ -57,19 +60,24 @@ export function DomainItem({ domain, onEdit }: DomainItemProps) {
     onEdit(domain);
   };
 
-  const displayUrl = extractDisplayDomain(domain.url, settings.showProtocol);
+  const displayUrl = extractDisplayDomain(domain.url, showProtocol);
 
   return (
     <div
       ref={setNodeRef}
       style={style}
       className="domain-item group"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onClick={handleSwap}
+      data-row-id={domain.id}
+      data-active={isActive || undefined}
+      onClick={handleClick}
+      onAuxClick={handleAuxClick}
+      title="Click to swap · Ctrl+click or middle-click for a new tab"
     >
       <button
+        type="button"
         className="drag-handle"
+        aria-label="Drag to reorder"
+        onClick={(e) => e.stopPropagation()}
         {...attributes}
         {...listeners}
       >
@@ -88,24 +96,28 @@ export function DomainItem({ domain, onEdit }: DomainItemProps) {
         </div>
       </div>
 
-      <div className={`flex items-center gap-0.5 transition-opacity duration-150 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
+      <div className="row-actions">
         <button
+          type="button"
           onClick={handleEdit}
           className="action-btn"
           title="Edit"
+          aria-label="Edit domain"
         >
           <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
         </button>
         <button
+          type="button"
           onClick={handleDelete}
           className="action-btn-danger"
           title="Delete"
+          aria-label="Delete domain"
         >
           <Trash2 className="h-3.5 w-3.5" />
         </button>
-        <div className="action-btn">
+        <span className="action-btn" aria-hidden="true">
           <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
-        </div>
+        </span>
       </div>
     </div>
   );

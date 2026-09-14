@@ -14,8 +14,26 @@ type ChromeStorageImpl = <T>(
   options: { key: string; throttleMs?: number }
 ) => StateCreator<T, [], []>;
 
+// One flusher per storage key. Lets short-lived contexts (the popup closes
+// itself right after a swap) force the throttled write out before unloading.
+const flushers = new Map<string, () => Promise<void>>();
+
+/**
+ * Immediately persist any pending throttled write for `key`.
+ * Resolves once Chrome has acknowledged the write. No-op if nothing is pending.
+ */
+export function flushStorage(key: string): Promise<void> {
+  const flush = flushers.get(key);
+  return flush ? flush() : Promise.resolve();
+}
+
 const chromeStorageImpl: ChromeStorageImpl = (f, { key, throttleMs = 500 }) => (set, get, api) => {
   let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+  const writeNow = (): Promise<void> =>
+    new Promise((resolve) => {
+      chrome.storage.local.set({ [key]: get() }, () => resolve());
+    });
 
   const saveToStorage = () => {
     if (timeoutId) {
@@ -23,10 +41,17 @@ const chromeStorageImpl: ChromeStorageImpl = (f, { key, throttleMs = 500 }) => (
     }
 
     timeoutId = setTimeout(() => {
-      const state = get();
-      chrome.storage.local.set({ [key]: state });
+      timeoutId = null;
+      writeNow();
     }, throttleMs);
   };
+
+  flushers.set(key, async () => {
+    if (!timeoutId) return;
+    clearTimeout(timeoutId);
+    timeoutId = null;
+    await writeNow();
+  });
 
   const wrappedSet: typeof set = (...args) => {
     set(...args);

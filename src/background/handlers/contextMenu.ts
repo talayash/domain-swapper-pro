@@ -1,9 +1,10 @@
 import type { Domain, Folder, Profile, Settings } from '~/types';
 import { ENVIRONMENT_ROLES } from '~/types';
-import { buildSwapUrl } from '~/lib/urlUtils';
+import { buildSwapUrl, isSwappableUrl, profileEntryToDomain } from '~/lib/urlUtils';
 
 const ROOT_MENU_ID = 'domain-swapper-root';
 const STORAGE_KEY = 'domain-swapper-pro';
+const MENU_CONTEXTS: chrome.contextMenus.ContextType[] = ['page', 'link'];
 
 interface StoredState {
   domains: Domain[];
@@ -13,18 +14,46 @@ interface StoredState {
   profiles: Profile[];
 }
 
-export function setupContextMenus() {
-  chrome.contextMenus.create({
-    id: ROOT_MENU_ID,
-    title: 'Swap Domain',
-    contexts: ['page', 'link']
-  });
+// Rebuilds are serialized so two rapid storage changes can never interleave a
+// `removeAll` with the `create` calls of the previous rebuild (which would
+// surface as "duplicate id" errors and a half-built menu).
+let rebuildChain: Promise<void> = Promise.resolve();
 
-  updateContextMenuItems();
+export function rebuildContextMenus(): Promise<void> {
+  rebuildChain = rebuildChain
+    .then(updateContextMenuItems)
+    .catch(() => {
+      // Context menu API errors are non-fatal; the next rebuild will retry.
+    });
+  return rebuildChain;
+}
 
+/**
+ * Only the parts of state that affect the menu tree should trigger a rebuild.
+ * Swapping via the popup updates `recentDomains` on every click, and that
+ * must not tear the whole menu down each time.
+ */
+function menuRelevantStateChanged(change: chrome.storage.StorageChange): boolean {
+  const before = change.oldValue as Partial<StoredState> | undefined;
+  const after = change.newValue as Partial<StoredState> | undefined;
+  if (!before || !after) return true;
+
+  return (
+    JSON.stringify(before.domains) !== JSON.stringify(after.domains) ||
+    JSON.stringify(before.folders) !== JSON.stringify(after.folders) ||
+    JSON.stringify(before.profiles) !== JSON.stringify(after.profiles)
+  );
+}
+
+/**
+ * Must be called at the top level of the service worker so the listener is
+ * re-registered every time Chrome wakes the worker, not only on install.
+ */
+export function registerContextMenuListeners() {
   chrome.storage.onChanged.addListener((changes, areaName) => {
-    if (areaName === 'local' && changes[STORAGE_KEY]) {
-      updateContextMenuItems();
+    const change = changes[STORAGE_KEY];
+    if (areaName === 'local' && change && menuRelevantStateChanged(change)) {
+      rebuildContextMenus();
     }
   });
 }
@@ -35,33 +64,22 @@ async function updateContextMenuItems() {
   chrome.contextMenus.create({
     id: ROOT_MENU_ID,
     title: 'Swap Domain',
-    contexts: ['page', 'link']
+    contexts: MENU_CONTEXTS
   });
 
   const result = await chrome.storage.local.get([STORAGE_KEY]);
   const state: StoredState | undefined = result[STORAGE_KEY];
 
-  if (!state) {
+  const hasProfiles = !!state?.profiles && state.profiles.length > 0;
+  const hasDomains = !!state?.domains && state.domains.length > 0;
+
+  if (!state || (!hasProfiles && !hasDomains)) {
     chrome.contextMenus.create({
       id: 'no-domains',
       parentId: ROOT_MENU_ID,
       title: 'No domains configured',
       enabled: false,
-      contexts: ['page', 'link']
-    });
-    return;
-  }
-
-  const hasProfiles = state.profiles && state.profiles.length > 0;
-  const hasDomains = state.domains && state.domains.length > 0;
-
-  if (!hasProfiles && !hasDomains) {
-    chrome.contextMenus.create({
-      id: 'no-domains',
-      parentId: ROOT_MENU_ID,
-      title: 'No domains configured',
-      enabled: false,
-      contexts: ['page', 'link']
+      contexts: MENU_CONTEXTS
     });
     return;
   }
@@ -73,7 +91,7 @@ async function updateContextMenuItems() {
         id: `profile-${profile.id}`,
         parentId: ROOT_MENU_ID,
         title: `⚡ ${profile.name}`,
-        contexts: ['page', 'link']
+        contexts: MENU_CONTEXTS
       });
 
       const sortedEntries = [...profile.entries].sort((a, b) => a.order - b.order);
@@ -83,7 +101,7 @@ async function updateContextMenuItems() {
           id: `profile-entry:${profile.id}::${entry.id}`,
           parentId: `profile-${profile.id}`,
           title: `${roleConfig.shortLabel} — ${entry.label || entry.url}`,
-          contexts: ['page', 'link']
+          contexts: MENU_CONTEXTS
         });
       }
     }
@@ -95,7 +113,7 @@ async function updateContextMenuItems() {
       id: 'profile-domain-separator',
       parentId: ROOT_MENU_ID,
       type: 'separator',
-      contexts: ['page', 'link']
+      contexts: MENU_CONTEXTS
     });
   }
 
@@ -116,7 +134,7 @@ async function updateContextMenuItems() {
         id: `folder-${folder.id}`,
         parentId: ROOT_MENU_ID,
         title: `${folder.icon || '📁'} ${folder.name}`,
-        contexts: ['page', 'link']
+        contexts: MENU_CONTEXTS
       });
 
       for (const domain of domainsInFolder) {
@@ -124,7 +142,7 @@ async function updateContextMenuItems() {
           id: `domain-${domain.id}`,
           parentId: `folder-${folder.id}`,
           title: domain.label || domain.url,
-          contexts: ['page', 'link']
+          contexts: MENU_CONTEXTS
         });
       }
     }
@@ -138,7 +156,7 @@ async function updateContextMenuItems() {
         id: 'separator',
         parentId: ROOT_MENU_ID,
         type: 'separator',
-        contexts: ['page', 'link']
+        contexts: MENU_CONTEXTS
       });
     }
 
@@ -147,7 +165,7 @@ async function updateContextMenuItems() {
         id: `domain-${domain.id}`,
         parentId: ROOT_MENU_ID,
         title: domain.label || domain.url,
-        contexts: ['page', 'link']
+        contexts: MENU_CONTEXTS
       });
     }
   }
@@ -191,21 +209,9 @@ function handleProfileEntryClick(
     if (!entry) return;
 
     const currentUrl = info.linkUrl || info.pageUrl || tab?.url;
-    if (!currentUrl || !currentUrl.startsWith('http')) return;
+    if (!isSwappableUrl(currentUrl)) return;
 
-    // Build a temporary Domain-like object for buildSwapUrl
-    const tempDomain: Domain = {
-      id: entry.id,
-      url: entry.url,
-      label: entry.label,
-      folderId: null,
-      protocol: entry.protocol || 'preserve',
-      order: 0,
-      createdAt: 0,
-      updatedAt: 0,
-    };
-
-    const newUrl = buildSwapUrl(currentUrl, tempDomain, state.settings);
+    const newUrl = buildSwapUrl(currentUrl, profileEntryToDomain(entry), state.settings);
 
     if (tab?.id) {
       chrome.tabs.update(tab.id, { url: newUrl });
@@ -228,7 +234,7 @@ function handleDomainClick(
     if (!domain) return;
 
     const currentUrl = info.linkUrl || info.pageUrl || tab?.url;
-    if (!currentUrl || !currentUrl.startsWith('http')) return;
+    if (!isSwappableUrl(currentUrl)) return;
 
     const newUrl = buildSwapUrl(currentUrl, domain, state.settings);
 

@@ -5,10 +5,13 @@ import { createDomainsSlice, type DomainsSlice } from './slices/domains';
 import { createFoldersSlice, type FoldersSlice } from './slices/folders';
 import { createSettingsSlice, type SettingsSlice } from './slices/settings';
 import { createProfilesSlice, type ProfilesSlice } from './slices/profiles';
-import { chromeStorage, loadFromStorage, syncToCloudStorage } from './middleware/chromeStorage';
+import { chromeStorage, loadFromStorage, syncToCloudStorage, flushStorage } from './middleware/chromeStorage';
 import { migrateData, getExportData } from '~/lib/migrations';
 
-const STORAGE_KEY = 'domain-swapper-pro';
+export const STORAGE_KEY = 'domain-swapper-pro';
+
+/** Force any pending throttled persistence to complete. Call before `window.close()`. */
+export const flushStore = () => flushStorage(STORAGE_KEY);
 
 export type StoreState = DomainsSlice & FoldersSlice & SettingsSlice & ProfilesSlice & {
   isLoaded: boolean;
@@ -32,10 +35,13 @@ export const useStore = create<StoreState>()(
         const stored = await loadFromStorage<AppState>(STORAGE_KEY);
 
         if (stored) {
+          // `migrateData` seeds DEFAULT_FOLDERS only when folders are absent.
+          // An empty array is a deliberate user choice and must be respected,
+          // otherwise deleted default folders reappear on every load.
           const migrated = migrateData(stored);
           set({
             domains: migrated.domains,
-            folders: migrated.folders.length > 0 ? migrated.folders : [...DEFAULT_FOLDERS],
+            folders: migrated.folders,
             settings: migrated.settings,
             recentDomains: migrated.recentDomains,
             profiles: migrated.profiles || [],
@@ -57,7 +63,7 @@ export const useStore = create<StoreState>()(
         const migrated = migrateData(data as AppState);
         set({
           domains: migrated.domains,
-          folders: migrated.folders.length > 0 ? migrated.folders : [...DEFAULT_FOLDERS],
+          folders: migrated.folders,
           settings: migrated.settings,
           recentDomains: migrated.recentDomains,
           profiles: migrated.profiles || []

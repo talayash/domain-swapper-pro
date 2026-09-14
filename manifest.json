@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Domain Swapper Pro",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Quickly switch between environments (dev, staging, QA, production) while preserving URL paths",
   "permissions": ["activeTab", "storage", "contextMenus"],
   "icons": {
@@ -23,7 +23,7 @@
   },
   "options_page": "src/options/index.html",
   "commands": {
-    "open-popup": {
+    "_execute_action": {
       "suggested_key": {
         "default": "Alt+D"
       },

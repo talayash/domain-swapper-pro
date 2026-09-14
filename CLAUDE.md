@@ -20,19 +20,19 @@ No test framework is configured. There are no lint commands — type checking vi
 
 ### Three Extension Contexts
 
-1. **Service Worker** (`src/background/`) — Runs in the background. Handles keyboard commands (`Alt+D` open popup, `Alt+Shift+D` quick swap) and right-click context menu. Reads from Chrome storage and navigates tabs.
+1. **Service Worker** (`src/background/`) — Runs in the background. Handles the `quick-swap` command (`Alt+Shift+D`), right-click context menu, and the toolbar badge. Reads from Chrome storage and navigates tabs. `Alt+D` uses Chrome's reserved `_execute_action` command, which opens the popup natively and never reaches `onCommand`. **All listeners must be registered at module top level** — MV3 suspends the worker when idle and only top-level code re-runs on wake, so anything registered inside `onInstalled` is lost.
 
-2. **Popup UI** (`src/popup/`) — Main user interface for browsing, searching, and clicking domains. React app with Zustand store.
+2. **Popup UI** (`src/popup/`) — Main user interface for browsing, searching, and clicking domains. React app with Zustand store. Keyboard-first: `usePopupRows` flattens ladder entries, folders (respecting collapse/search visibility), and uncategorized domains into one ordered row list; `DomainList` drives arrow/Enter/Esc navigation from it, and `PopupNavProvider` shares the active row ID. All swaps go through `useSwap`, which also flushes the throttled storage write before `window.close()`.
 
 3. **Options Page** (`src/options/`) — Settings, keyboard shortcut customization, import/export. Separate React entry point.
 
 ### State Management
 
-Zustand store composed of three slices (`src/store/slices/`): `domains`, `folders`, `settings`. A custom `chromeStorage` middleware (`src/store/middleware/`) persists state to Chrome Local Storage API with 500ms throttled writes. The store key is `domain-swapper-pro`.
+Zustand store composed of four slices (`src/store/slices/`): `domains`, `folders`, `settings`, `profiles`. A custom `chromeStorage` middleware (`src/store/middleware/`) persists state to Chrome Local Storage API with 500ms throttled writes; `flushStore()` forces a pending write out (required before closing the popup). The store key is `domain-swapper-pro`. The `folders` slice is typed against `FoldersSlice & Pick<DomainsSlice, 'domains'>` because deleting a folder moves its domains to Uncategorized.
 
 ### URL Swap Flow
 
-When a user clicks a domain: get current tab URL → `parseDomainInput()` extracts target hostname/port/protocol → `buildSwapUrl()` preserves path+query and applies protocol rules → navigate tab → track in `recentDomains` (max 5). Core logic lives in `src/lib/urlUtils.ts`.
+When a user clicks a domain: get current tab URL → `parseDomainInput()` extracts target hostname/port/protocol (lowercased, path stripped) → `buildSwapUrl()` preserves path+query and applies protocol rules → navigate tab (or `openUrlInNewTab` on Ctrl/middle-click) → track in `recentDomains` (max 5). Core logic lives in `src/lib/urlUtils.ts`. Environment detection (popup ladder, item badges, toolbar badge) matches on `getHostKey()` = `hostname[:port]`, the single shared predicate. Profile entries are adapted for swapping via `profileEntryToDomain()`.
 
 ### Data Model
 
@@ -46,7 +46,7 @@ When a user clicks a domain: get current tab URL → `parseDomainInput()` extrac
 - **Path alias**: `~` maps to `src/` (configured in both `vite.config.ts` and `tsconfig.json`).
 - **Radix UI dialogs**: Modals use `Dialog.Root` → `Dialog.Portal` → `Dialog.Overlay` + `Dialog.Content`.
 - **dnd-kit**: Drag-and-drop reordering with `DndContext` + `SortableContext`.
-- **Fuse.js**: Fuzzy search over domains, memoized in `src/popup/hooks/useDomains.ts`.
+- **Fuse.js**: Fuzzy search over domains, memoized in `src/popup/hooks/usePopupRows.ts`. While searching, folders with no matches are hidden and folders with matches are forced open.
 - **Data migrations**: `src/lib/migrations.ts` handles version 0→1 format migration on load.
 - **Validation**: Functions return `{ isValid: boolean; error?: string }` (`src/lib/validators.ts`).
 
