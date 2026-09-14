@@ -87,8 +87,8 @@ export function ProfileShareModal({ isOpen, onClose, profile }: ProfileShareModa
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/50" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-background rounded-lg shadow-lg p-5 w-[480px] max-h-[85vh] overflow-y-auto border border-border animate-fade-in">
+        <Dialog.Overlay className="modal-overlay" />
+        <Dialog.Content className="modal-content-md">
           <div className="flex items-center justify-between mb-5">
             <Dialog.Title className="text-base font-medium flex items-center gap-2">
               <Share2 className="h-4 w-4 text-muted-foreground" />

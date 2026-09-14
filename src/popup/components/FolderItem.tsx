@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   DndContext,
   closestCenter,
@@ -16,7 +16,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import * as Collapsible from '@radix-ui/react-collapsible';
-import { ChevronRight, ChevronDown, GripVertical, Pencil, Trash2, FolderPlus } from 'lucide-react';
+import { ChevronRight, GripVertical, Pencil, Trash2, FolderPlus } from 'lucide-react';
 import type { Folder, Domain } from '~/types';
 import { useStore } from '~/store';
 import { useDomainsByFolder } from '../hooks/useDomains';
@@ -25,7 +25,10 @@ import { DomainItem } from './DomainItem';
 
 interface FolderItemProps {
   folder: Folder;
-  searchQuery: string;
+  /** Domains matching the current search, or null when not searching. */
+  matchedDomainIds: Set<string> | null;
+  /** Folders that should render (see usePopupRows). */
+  visibleFolderIds: Set<string>;
   onEditDomain: (domain: Domain) => void;
   onEditFolder: (folder: Folder) => void;
   onAddSubfolder: (parentId: string) => void;
@@ -34,13 +37,13 @@ interface FolderItemProps {
 
 export function FolderItem({
   folder,
-  searchQuery,
+  matchedDomainIds,
+  visibleFolderIds,
   onEditDomain,
   onEditFolder,
   onAddSubfolder,
   level = 0
 }: FolderItemProps) {
-  const [isHovered, setIsHovered] = useState(false);
   const toggleFolderCollapse = useStore((state) => state.toggleFolderCollapse);
   const deleteFolder = useStore((state) => state.deleteFolder);
   const reorderDomains = useStore((state) => state.reorderDomains);
@@ -68,6 +71,23 @@ export function FolderItem({
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
+  const isSearching = matchedDomainIds !== null;
+
+  if (!visibleFolderIds.has(folder.id)) {
+    return null;
+  }
+
+  const filteredDomains = isSearching
+    ? domains.filter((d) => matchedDomainIds.has(d.id))
+    : domains;
+
+  const visibleChildren = childFolders.filter((c) => visibleFolderIds.has(c.id));
+  const hasContent = filteredDomains.length > 0 || visibleChildren.length > 0;
+
+  // While searching every folder with a match is forced open so results are
+  // never hidden behind a collapsed header.
+  const isOpen = isSearching || !folder.isCollapsed;
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -83,9 +103,24 @@ export function FolderItem({
     }
   };
 
+  const handleToggle = () => {
+    if (!isSearching) toggleFolderCollapse(folder.id);
+  };
+
+  const handleHeaderKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleToggle();
+    }
+  };
+
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm(`Delete folder "${folder.name}" and move all domains to Uncategorized?`)) {
+    const domainCount = domains.length;
+    const detail = domainCount > 0
+      ? ` Its ${domainCount} domain${domainCount === 1 ? '' : 's'} will move to Uncategorized.`
+      : '';
+    if (confirm(`Delete folder "${folder.name}"?${detail}`)) {
       deleteFolder(folder.id);
     }
   };
@@ -100,72 +135,71 @@ export function FolderItem({
     onAddSubfolder(folder.id);
   };
 
-  const filteredDomains = searchQuery
-    ? domains.filter(
-        (d) =>
-          d.url.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          d.label?.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : domains;
-
-  const hasContent = filteredDomains.length > 0 || childFolders.length > 0;
-
   return (
     <div ref={setNodeRef} style={style} className="select-none mb-1">
-      <Collapsible.Root open={!folder.isCollapsed} onOpenChange={() => toggleFolderCollapse(folder.id)}>
+      {/* Controlled: the header div below is the toggle, so no Collapsible.Trigger is used. */}
+      <Collapsible.Root open={isOpen}>
         <div
           className="folder-item group"
           style={{ paddingLeft: `${level * 16 + 8}px` }}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
+          role="button"
+          tabIndex={0}
+          aria-expanded={isOpen}
+          onClick={handleToggle}
+          onKeyDown={handleHeaderKeyDown}
         >
           <button
+            type="button"
             className="drag-handle"
+            aria-label="Drag to reorder"
+            onClick={(e) => e.stopPropagation()}
             {...attributes}
             {...listeners}
           >
             <GripVertical className="h-4 w-4 text-muted-foreground" />
           </button>
 
-          <Collapsible.Trigger asChild>
-            <button className="p-0.5 rounded hover:bg-secondary/80 transition-colors">
-              {folder.isCollapsed ? (
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              ) : (
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-              )}
-            </button>
-          </Collapsible.Trigger>
+          <ChevronRight
+            className={`h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-150 ${
+              isOpen ? 'rotate-90' : ''
+            }`}
+          />
 
-          <span className="text-base">{folder.icon || '📁'}</span>
+          <span className="text-base leading-none">{folder.icon || '📁'}</span>
 
           <span className="flex-1 text-sm font-medium truncate text-foreground">{folder.name}</span>
 
-          <span className="badge badge-muted mr-1">
+          <span className="badge badge-muted mr-1 tabular-nums">
             {filteredDomains.length}
           </span>
 
-          <div className={`flex items-center gap-0.5 transition-opacity duration-150 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
+          <div className="row-actions">
             {level === 0 && (
               <button
+                type="button"
                 onClick={handleAddSubfolder}
                 className="action-btn"
                 title="Add subfolder"
+                aria-label="Add subfolder"
               >
                 <FolderPlus className="h-3.5 w-3.5 text-muted-foreground" />
               </button>
             )}
             <button
+              type="button"
               onClick={handleEdit}
               className="action-btn"
               title="Edit"
+              aria-label="Edit folder"
             >
               <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
             </button>
             <button
+              type="button"
               onClick={handleDelete}
               className="action-btn-danger"
               title="Delete"
+              aria-label="Delete folder"
             >
               <Trash2 className="h-3.5 w-3.5" />
             </button>
@@ -174,12 +208,13 @@ export function FolderItem({
 
         <Collapsible.Content>
           {hasContent && (
-            <div className="ml-4 animate-fade-in" style={{ marginLeft: `${level * 16 + 24}px` }}>
-              {childFolders.map((childFolder) => (
+            <div className="animate-fade-in" style={{ marginLeft: `${level * 16 + 24}px` }}>
+              {visibleChildren.map((childFolder) => (
                 <FolderItem
                   key={childFolder.id}
                   folder={childFolder}
-                  searchQuery={searchQuery}
+                  matchedDomainIds={matchedDomainIds}
+                  visibleFolderIds={visibleFolderIds}
                   onEditDomain={onEditDomain}
                   onEditFolder={onEditFolder}
                   onAddSubfolder={onAddSubfolder}

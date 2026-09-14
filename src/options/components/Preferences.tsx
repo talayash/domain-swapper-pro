@@ -69,7 +69,7 @@ export function Preferences() {
             <div>
               <label className="text-sm font-medium">Chrome Sync</label>
               <p className="text-xs text-muted-foreground">
-                Sync settings across your Chrome browsers
+                Allow backing up your configuration to Chrome sync storage via Import / Export → Sync Now
               </p>
             </div>
             <Switch.Root

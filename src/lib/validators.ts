@@ -1,4 +1,4 @@
-import { parseDomainInput } from './urlUtils';
+import { parseDomainInput, hasPathComponent } from './urlUtils';
 
 export interface ValidationResult {
   isValid: boolean;
@@ -12,6 +12,10 @@ const PORT_REGEX = /^[1-9][0-9]{0,4}$/;
 export function validateDomainInput(input: string): ValidationResult {
   if (!input || input.trim().length === 0) {
     return { isValid: false, error: 'Domain is required' };
+  }
+
+  if (hasPathComponent(input)) {
+    return { isValid: false, error: 'Enter only the domain (and optional port), without a path' };
   }
 
   const parsed = parseDomainInput(input);

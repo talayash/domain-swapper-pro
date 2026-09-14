@@ -22,9 +22,11 @@
 | **One-Click Switching** | Swap domains instantly while keeping your URL path intact |
 | **Port Support** | Full support for localhost and custom ports (e.g., `localhost:3000`) |
 | **Keyboard Shortcuts** | `Alt+D` to open, `Alt+Shift+D` for quick swap to last used domain |
+| **Keyboard-First Popup** | Type to filter, `↑`/`↓` to choose, `Enter` to swap, `Ctrl+Enter` for a new tab — no mouse needed |
+| **Open in New Tab** | `Ctrl+click` or middle-click any domain to swap into a new tab |
 | **Folder Organization** | Group related domains with nested subfolders |
 | **Drag & Drop** | Reorder domains and folders with ease |
-| **Fuzzy Search** | Find domains quickly with smart search |
+| **Fuzzy Search** | Find domains quickly with smart search; matching folders expand automatically |
 | **Dark Mode** | Automatic theme detection with manual override |
 | **Import/Export** | Backup and share your domain configurations |
 | **Context Menu** | Right-click to swap domains directly from any page |
@@ -82,6 +84,8 @@
 ### Switching Domains
 
 - **Click** any domain in the list to swap your current tab's URL
+- **Ctrl+click** (or middle-click) a domain to open the swapped URL in a new tab
+- **Keyboard only:** press `Alt+D`, start typing, use `↑`/`↓` to highlight a domain, then `Enter` (or `Ctrl+Enter` for a new tab). `Esc` clears the search, then closes the popup
 - **Right-click** on any page and use the context menu
 - Press **Alt+Shift+D** to instantly swap to your last used domain
 
@@ -95,12 +99,22 @@
 
 ## Keyboard Shortcuts
 
+**Global** (customize at `chrome://extensions/shortcuts`)
+
 | Shortcut | Action |
 |----------|--------|
 | `Alt+D` | Open Domain Swapper popup |
 | `Alt+Shift+D` | Quick swap to last used domain |
 
-> Customize shortcuts at `chrome://extensions/shortcuts`
+**Inside the popup**
+
+| Key | Action |
+|-----|--------|
+| Type | Filter domains (fuzzy) |
+| `↑` / `↓` | Move the highlight between domains |
+| `Enter` | Swap the current tab to the highlighted domain |
+| `Ctrl+Enter` | Open the swapped URL in a new tab |
+| `Esc` | Clear the search, then close the popup |
 
 ---
 
@@ -145,7 +159,7 @@ domain-swapper-pro/
 ├── src/
 │   ├── background/     # Service worker & handlers
 │   ├── lib/            # Utilities (URL parsing, validators)
-│   ├── popup/          # Popup UI components
+│   ├── popup/          # Popup UI components and hooks (search, keyboard nav, swap)
 │   ├── options/        # Options page
 │   ├── store/          # Zustand state management
 │   ├── styles/         # Global styles

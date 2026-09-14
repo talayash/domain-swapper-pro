@@ -54,28 +54,28 @@ function Options() {
           <Tabs.List className="flex gap-1 border-b mb-6">
             <Tabs.Trigger
               value="preferences"
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary transition-colors"
+              className="tab-trigger"
             >
               <Settings className="h-4 w-4" />
               Preferences
             </Tabs.Trigger>
             <Tabs.Trigger
               value="shortcuts"
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary transition-colors"
+              className="tab-trigger"
             >
               <Keyboard className="h-4 w-4" />
               Shortcuts
             </Tabs.Trigger>
             <Tabs.Trigger
               value="profiles"
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary transition-colors"
+              className="tab-trigger"
             >
               <Layers className="h-4 w-4" />
               Profiles
             </Tabs.Trigger>
             <Tabs.Trigger
               value="import-export"
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary transition-colors"
+              className="tab-trigger"
             >
               <Download className="h-4 w-4" />
               Import / Export

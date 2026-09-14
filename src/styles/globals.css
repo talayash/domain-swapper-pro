@@ -111,14 +111,35 @@
            hover:bg-secondary/60;
   }
 
+  /* Keyboard-highlighted row: a left accent bar plus a soft fill so it reads
+     distinctly from the mouse-hover state even when both apply. */
+  .domain-item[data-active],
+  .ladder-entry[data-active] {
+    @apply bg-secondary shadow-[inset_2px_0_0_0_hsl(var(--primary))];
+  }
+
   .folder-item {
     @apply flex items-center gap-1 px-2 py-1.5 rounded-md cursor-pointer transition-colors duration-100
-           hover:bg-secondary/60;
+           hover:bg-secondary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
+           focus-visible:ring-inset;
+  }
+
+  .ladder-entry {
+    @apply w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left transition-colors duration-100
+           hover:bg-secondary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
+           focus-visible:ring-inset;
+  }
+
+  /* Row actions reveal on hover, keyboard focus within the row, or keyboard highlight */
+  .row-actions {
+    @apply flex items-center gap-0.5 opacity-0 transition-opacity duration-150
+           group-hover:opacity-100 group-focus-within:opacity-100 group-data-[active]:opacity-100;
   }
 
   /* Action buttons */
   .action-btn {
-    @apply p-1.5 rounded-md transition-colors duration-100 hover:bg-secondary/80;
+    @apply p-1.5 rounded-md transition-colors duration-100 hover:bg-secondary/80
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring;
   }
 
   .action-btn-danger {
@@ -147,6 +168,48 @@
     @apply fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
            bg-background rounded-lg shadow-lg p-5 w-[340px] max-h-[85vh] overflow-y-auto
            border border-border animate-fade-in;
+  }
+
+  /* Options-page modals: wider, but never wider than the viewport */
+  .modal-content-wide {
+    @apply fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+           bg-background rounded-lg shadow-lg p-5 w-[680px] max-w-[calc(100vw-2rem)]
+           max-h-[85vh] overflow-y-auto border border-border animate-fade-in;
+  }
+
+  .modal-content-md {
+    @apply fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+           bg-background rounded-lg shadow-lg p-5 w-[480px] max-w-[calc(100vw-2rem)]
+           max-h-[85vh] overflow-y-auto border border-border animate-fade-in;
+  }
+
+  /* Options page tabs */
+  .tab-trigger {
+    @apply flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 border-transparent
+           text-muted-foreground transition-colors hover:text-foreground
+           data-[state=active]:border-primary data-[state=active]:text-primary
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-t-md;
+  }
+
+  /* Shortcut key display (options page) */
+  .shortcut-key {
+    @apply inline-flex items-center px-2.5 py-1 bg-background border border-border rounded-md
+           text-sm font-mono text-foreground;
+  }
+
+  /* Keyboard hints strip */
+  .kbd {
+    @apply inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded border border-border
+           bg-muted font-mono text-[10px] leading-none text-muted-foreground;
+  }
+
+  .kbd-hints {
+    @apply flex items-center justify-center gap-3 px-3 py-1.5 text-[10px] text-muted-foreground
+           border-t bg-muted/30 whitespace-nowrap overflow-hidden;
+  }
+
+  .kbd-hints > span {
+    @apply inline-flex items-center gap-1;
   }
 
   /* Header */

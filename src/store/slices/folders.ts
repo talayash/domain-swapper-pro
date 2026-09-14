@@ -2,6 +2,7 @@ import type { StateCreator } from 'zustand';
 import type { Folder, FolderInput } from '~/types';
 import { DEFAULT_FOLDERS } from '~/types';
 import { v4 as uuidv4 } from 'uuid';
+import type { DomainsSlice } from './domains';
 
 export interface FoldersSlice {
   folders: Folder[];
@@ -12,7 +13,34 @@ export interface FoldersSlice {
   reorderFolders: (orderedIds: string[]) => void;
 }
 
-export const createFoldersSlice: StateCreator<FoldersSlice, [], [], FoldersSlice> = (set, get) => ({
+/**
+ * Collect a folder and every folder nested beneath it, at any depth.
+ */
+export function collectFolderSubtreeIds(folders: Folder[], rootId: string): string[] {
+  const result: string[] = [];
+  const queue = [rootId];
+
+  while (queue.length > 0) {
+    const currentId = queue.shift()!;
+    result.push(currentId);
+    for (const folder of folders) {
+      if (folder.parentId === currentId) {
+        queue.push(folder.id);
+      }
+    }
+  }
+
+  return result;
+}
+
+// The folders slice reads and writes `domains` when deleting a folder, so it
+// is typed against the union of both slices (the Zustand "slices" pattern).
+export const createFoldersSlice: StateCreator<
+  FoldersSlice & Pick<DomainsSlice, 'domains'>,
+  [],
+  [],
+  FoldersSlice
+> = (set, get) => ({
   folders: [...DEFAULT_FOLDERS],
 
   addFolder: (input) => {
@@ -54,16 +82,29 @@ export const createFoldersSlice: StateCreator<FoldersSlice, [], [], FoldersSlice
     }));
   },
 
+  /**
+   * Delete a folder and all nested subfolders. Domains that lived in any of
+   * those folders are moved to Uncategorized (appended after existing ones)
+   * rather than being orphaned with a dangling folderId.
+   */
   deleteFolder: (id) => {
     set((state) => {
-      const childFolderIds = state.folders
-        .filter((f) => f.parentId === id)
-        .map((f) => f.id);
+      const idsToDelete = new Set(collectFolderSubtreeIds(state.folders, id));
 
-      const allFolderIdsToDelete = [id, ...childFolderIds];
+      const uncategorized = state.domains.filter((d) => d.folderId === null);
+      let nextOrder = uncategorized.length > 0
+        ? Math.max(...uncategorized.map((d) => d.order)) + 1
+        : 0;
+
+      const now = Date.now();
+      const domains = state.domains.map((domain) => {
+        if (domain.folderId === null || !idsToDelete.has(domain.folderId)) return domain;
+        return { ...domain, folderId: null, order: nextOrder++, updatedAt: now };
+      });
 
       return {
-        folders: state.folders.filter((folder) => !allFolderIdsToDelete.includes(folder.id))
+        folders: state.folders.filter((folder) => !idsToDelete.has(folder.id)),
+        domains
       };
     });
   },
