@@ -37,6 +37,3 @@ yarn-error.log*
 .claude/worktrees/
 .claude/proven-config.json
 .claude/.proven-config-version
-[INFO] Recording command outcome: printf
-
-[OK] Command outcome recorded
