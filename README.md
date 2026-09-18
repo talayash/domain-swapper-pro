@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="icons/icon-128.png" alt="Domain Swapper Pro" width="128" height="128">
+  <img src="docs/icon-128.png" alt="Domain Swapper Pro" width="128" height="128">
 </p>
 
 <h1 align="center">Domain Swapper Pro</h1>
