@@ -22,7 +22,7 @@
 | **One-Click Switching** | Swap domains instantly while keeping your URL path intact |
 | **Port Support** | Full support for localhost and custom ports (e.g., `localhost:3000`) |
 | **Keyboard Shortcuts** | `Alt+D` to open, `Alt+Shift+D` for quick swap to last used domain |
-| **Keyboard-First Popup** | Type to filter, `↑`/`↓` to choose, `Enter` to swap, `Ctrl+Enter` for a new tab — no mouse needed |
+| **Keyboard-First Popup** | Type to filter, `↑`/`↓` to choose, `Enter` to swap, `Ctrl+Enter` for a new tab (no mouse needed) |
 | **Open in New Tab** | `Ctrl+click` or middle-click any domain to swap into a new tab |
 | **Folder Organization** | Group related domains with nested subfolders |
 | **Drag & Drop** | Reorder domains and folders with ease |
@@ -173,13 +173,13 @@ domain-swapper-pro/
 
 ## Tech Stack
 
-- **React 18** — UI framework
-- **TypeScript** — Type safety
-- **Vite** — Build tool with CRXJS plugin
-- **Tailwind CSS** — Styling
-- **Zustand** — State management
-- **Radix UI** — Accessible components
-- **dnd-kit** — Drag and drop
+- **React 18**: UI framework
+- **TypeScript**: Type safety
+- **Vite**: Build tool with CRXJS plugin
+- **Tailwind CSS**: Styling
+- **Zustand**: State management
+- **Radix UI**: Accessible components
+- **dnd-kit**: Drag and drop
 
 ---
 
